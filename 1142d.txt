@@ -1,0 +1,60 @@
+import socket
+
+def send_data_and_check_response(target, port, data):
+    try:
+        # Create a socket object
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(2)  # Set a timeout of 2 seconds
+
+        # Connect to the target and port
+        sock.connect((target, port))
+
+        # Send the arbitrary data
+        sock.send(data.encode())
+
+        # Receive the response
+        response = sock.recv(1024).decode()
+
+        # Check if the port is open based on the response
+        if response:
+            print(f"Port {port} is open. Received response:")
+            print(response)
+            print("This port should be closed!")
+        else:
+            print(f"Port {port} is closed.")
+
+        # Close the socket connection
+        sock.close()
+
+    except socket.timeout:
+        print(f"Port {port} is closed (timeout).")
+
+    except ConnectionRefusedError:
+        print(f"Port {port} is closed (connection refused).")
+
+    except Exception as e:
+        print(f"Error occurred while checking port {port}: {str(e)}")
+
+def main():
+    target = input("Enter the target IP address or domain: ")
+
+    # Define the services, ports, and arbitrary data to send
+    services = [
+        {"name": "FTP", "port": 21, "data": "USER anonymous\r\nPASS\r\n"},
+        {"name": "SSH", "port": 22, "data": "SSH-2.0-OpenSSH_7.6p1 Ubuntu-4ubuntu0.3\r\n"},
+        {"name": "Telnet", "port": 23, "data": ""},
+        {"name": "SMTP", "port": 25, "data": "HELO example.com\r\n"},
+        {"name": "DNS", "port": 53, "data": ""},
+        {"name": "HTTP", "port": 80, "data": "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"},
+        {"name": "POP3", "port": 110, "data": "USER username\r\n"},
+        {"name": "IMAP", "port": 143, "data": "A1 LOGIN username password\r\n"}
+    ]
+
+    print(f"Checking services on target: {target}")
+
+    for service in services:
+        print(f"\nChecking {service['name']} service on port {service['port']}...")
+        send_data_and_check_response(target, service['port'], service['data'])
+
+if __name__ == "__main__":
+    main()

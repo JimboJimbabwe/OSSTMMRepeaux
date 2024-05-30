@@ -1,0 +1,57 @@
+import subprocess
+
+def perform_dig(domain):
+    try:
+        output = subprocess.check_output(["dig", domain], universal_newlines=True)
+        return output
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while performing dig on {domain}: {str(e)}")
+        return None
+
+def compare_dig_outputs(output1, output2):
+    return output1 == output2
+
+def main():
+    wordlist_file = "domain_wordlist.txt"
+    reference_output_file = "reference_dig_output.txt"
+
+    try:
+        with open(reference_output_file, "r") as file:
+            reference_output = file.read()
+
+        with open(wordlist_file, "r") as file:
+            domains = file.read().splitlines()
+
+        matched_domains = []
+        unmatched_domains = []
+
+        for domain in domains:
+            domain_output = perform_dig(domain)
+
+            if domain_output is not None:
+                if compare_dig_outputs(domain_output, reference_output):
+                    matched_domains.append(domain)
+                else:
+                    unmatched_domains.append(domain)
+
+        total_domains = len(domains)
+        matched_count = len(matched_domains)
+        unmatched_count = len(unmatched_domains)
+
+        print(f"Total domains: {total_domains}")
+        print(f"Matched domains: {matched_count}")
+        print(f"Unmatched domains: {unmatched_count}")
+
+        print("\nMatched domains:")
+        for domain in matched_domains:
+            print(domain)
+
+        print("\nUnmatched domains:")
+        for domain in unmatched_domains:
+            print(domain)
+
+    except FileNotFoundError as e:
+        print(f"File not found: {str(e)}")
+
+if __name__ == "__main__":
+    main()

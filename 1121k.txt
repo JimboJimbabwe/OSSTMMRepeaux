@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Function to perform traceroute and verify paths
+function verify_network_paths() {
+    echo "Enter the target domain or IP address:"
+    read target
+
+    # Perform traceroute
+    traceroute_result=$(traceroute $target)
+
+    echo "Traceroute result for $target:"
+    echo "$traceroute_result"
+
+    # Verify the paths
+    echo "Verifying the paths..."
+    echo "$traceroute_result" | while read line; do
+        hop=$(echo "$line" | awk '{print $2}')
+        if [[ $hop != *"*"* ]]; then
+            whois_result=$(whois $hop | grep -i "OrgName\|owner")
+            echo "Hop: $hop"
+            echo "Organization: $whois_result"
+            echo "------------------------"
+        fi
+    done
+}
+
+# Main script
+verify_network_paths

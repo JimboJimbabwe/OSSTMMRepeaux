@@ -1,0 +1,73 @@
+#!/bin/bash
+
+# Function to perform WHOIS lookup and compare with pre-engagement form data
+function verify_network_owner() {
+    echo "Enter the target IP address:"
+    read target_ip
+
+    echo "Enter the expected owner from the pre-engagement form:"
+    read expected_owner
+
+    # Perform WHOIS lookup
+    whois_result=$(whois $target_ip)
+
+    # Extract the actual owner from the WHOIS result
+    actual_owner=$(echo "$whois_result" | grep -i "OrgName\|owner")
+
+    echo "WHOIS result for $target_ip:"
+    echo "$actual_owner"
+
+    # Compare the actual owner with the expected owner
+    if echo "$actual_owner" | grep -iq "$expected_owner"; then
+        echo "Owner verification successful. The actual owner matches the expected owner."
+    else
+        echo "Owner verification failed. The actual owner does not match the expected owner."
+    fi
+}
+
+# Function to perform DIG lookup and compare with pre-engagement form data
+function verify_domain_owner() {
+    echo "Enter the target domain:"
+    read target_domain
+
+    echo "Enter the expected owner from the pre-engagement form:"
+    read expected_owner
+
+    # Perform DIG lookup
+    dig_result=$(dig +short $target_domain)
+
+    # Extract the actual owner from the DIG result
+    actual_owner=$(whois $target_domain | grep -i "Registrant Name\|Registrant Organization")
+
+    echo "DIG result for $target_domain:"
+    echo "$dig_result"
+
+    echo "Domain registrant information:"
+    echo "$actual_owner"
+
+    # Compare the actual owner with the expected owner
+    if echo "$actual_owner" | grep -iq "$expected_owner"; then
+        echo "Owner verification successful. The actual owner matches the expected owner."
+    else
+        echo "Owner verification failed. The actual owner does not match the expected owner."
+    fi
+}
+
+# Main script
+
+echo "Select an option:"
+echo "1. Verify the owner of the targets from network registration information"
+echo "2. Verify the owner of the target domains from domain registration information"
+read -p "Enter your choice (1 or 2): " choice
+
+case $choice in
+    1)
+        verify_network_owner
+        ;;
+    2)
+        verify_domain_owner
+        ;;
+    *)
+        echo "Invalid choice. Please enter either 1 or 2."
+        ;;
+esac

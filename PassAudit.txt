@@ -1,0 +1,81 @@
+import time
+import string
+
+def check_password_in_wordlist(password, wordlist_file):
+    try:
+        with open(wordlist_file, "r") as file:
+            wordlist = file.read().splitlines()
+
+        if password in wordlist:
+            return True
+        else:
+            return False
+
+    except FileNotFoundError:
+        print(f"Wordlist file '{wordlist_file}' not found.")
+        return False
+
+def estimate_password_strength(password):
+    # Define character sets
+    lowercase_chars = string.ascii_lowercase
+    uppercase_chars = string.ascii_uppercase
+    digit_chars = string.digits
+    special_chars = string.punctuation
+
+    # Initialize variables
+    length = len(password)
+    lowercase_count = 0
+    uppercase_count = 0
+    digit_count = 0
+    special_count = 0
+
+    # Count character types
+    for char in password:
+        if char in lowercase_chars:
+            lowercase_count += 1
+        elif char in uppercase_chars:
+            uppercase_count += 1
+        elif char in digit_chars:
+            digit_count += 1
+        elif char in special_chars:
+            special_count += 1
+
+    # Calculate total possible combinations
+    total_combinations = (len(lowercase_chars) ** lowercase_count) * \
+                         (len(uppercase_chars) ** uppercase_count) * \
+                         (len(digit_chars) ** digit_count) * \
+                         (len(special_chars) ** special_count)
+
+    # Estimate cracking time based on guessing rate
+    guessing_rate = 1000000  # Assume 1 million guesses per second
+    cracking_time = total_combinations / guessing_rate
+
+    return cracking_time
+
+def main():
+    # Get the dummy password from the user
+    password = input("Enter the dummy password: ")
+
+    # Specify the wordlist file path
+    wordlist_file = "path/to/wordlist.txt"
+
+    # Check if the password exists in the wordlist
+    if check_password_in_wordlist(password, wordlist_file):
+        print("Password found in the wordlist. It is a weak password.")
+    else:
+        print("Password not found in the wordlist.")
+
+    # Estimate the password strength and cracking time
+    cracking_time = estimate_password_strength(password)
+
+    print(f"Estimated cracking time: {cracking_time:.2f} seconds")
+
+    if cracking_time < 86400:  # Less than 1 day
+        print("The password is weak.")
+    elif cracking_time < 2592000:  # Less than 1 month
+        print("The password is moderate.")
+    else:
+        print("The password is strong.")
+
+if __name__ == "__main__":
+    main()

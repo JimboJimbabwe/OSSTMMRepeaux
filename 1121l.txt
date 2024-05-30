@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Function to add custom entries to /etc/hosts
+function add_custom_hosts() {
+    echo "Enter the domain name:"
+    read domain
+
+    echo "Enter the IP address:"
+    read ip
+
+    # Backup the original /etc/hosts file
+    sudo cp /etc/hosts /etc/hosts.bak
+
+    # Add the custom entry to /etc/hosts
+    echo "$ip $domain" | sudo tee -a /etc/hosts > /dev/null
+
+    echo "Custom entry added to /etc/hosts:"
+    echo "$ip $domain"
+}
+
+# Function to restore the original /etc/hosts file
+function restore_hosts() {
+    # Restore the original /etc/hosts file from the backup
+    sudo cp /etc/hosts.bak /etc/hosts
+
+    echo "Original /etc/hosts file restored."
+}
+
+# Main script
+echo "Select an option:"
+echo "1. Add custom entry to /etc/hosts"
+echo "2. Restore original /etc/hosts"
+read -p "Enter your choice (1 or 2): " choice
+
+case $choice in
+    1)
+        add_custom_hosts
+        ;;
+    2)
+        restore_hosts
+        ;;
+    *)
+        echo "Invalid choice. Please enter either 1 or 2."
+        ;;
+esac

@@ -1,0 +1,33 @@
+import math
+import string
+
+def detect_character_set(token):
+    if all(c in string.ascii_letters + string.digits for c in token):
+        return "alphanumeric", 62
+    elif all(c in string.ascii_letters + string.digits + "+/" for c in token):
+        return "base64", 64
+    elif all(c in string.ascii_letters + string.digits + "-_" for c in token):
+        return "url_safe_base64", 64
+    elif all(c in string.hexdigits for c in token):
+        return "hexadecimal", 16
+    elif all(c in string.ascii_uppercase + "234567" for c in token):
+        return "base32", 32
+    elif all(32 <= ord(c) <= 126 for c in token):
+        return "ascii_printable", 95
+    else:
+        return "extended_ascii", 256
+
+def estimate_bits(token, charset_size):
+    token_length = len(token)
+    bits = token_length * math.log2(charset_size)
+    return round(bits)
+
+session_token = "abc123def456ghi789jkl012mno345pqr"
+
+charset, charset_size = detect_character_set(session_token)
+estimated_bits = estimate_bits(session_token, charset_size)
+
+print(f"Detected character set: {charset}")
+print(f"Estimated number of bits: {estimated_bits}")
+
+

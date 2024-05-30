@@ -1,0 +1,59 @@
+import requests
+
+def check_target_redirection(target_url, proxy=None):
+    try:
+        # Send a GET request to the target URL
+        response = requests.get(target_url, proxies=proxy, allow_redirects=False, timeout=5)
+
+        # Check the response status code and headers
+        status_code = response.status_code
+        location_header = response.headers.get("Location")
+
+        print(f"Target URL: {target_url}")
+        print(f"Status Code: {status_code}")
+
+        if status_code in [301, 302, 303, 307, 308]:
+            print(f"Redirection Detected!")
+            print(f"Location: {location_header}")
+
+            # Follow the redirection
+            redirected_response = requests.get(location_header, proxies=proxy, allow_redirects=False, timeout=5)
+            redirected_status_code = redirected_response.status_code
+            redirected_location_header = redirected_response.headers.get("Location")
+
+            print(f"Redirected URL: {location_header}")
+            print(f"Redirected Status Code: {redirected_status_code}")
+
+            if redirected_status_code in [301, 302, 303, 307, 308]:
+                print(f"Further Redirection Detected!")
+                print(f"Redirected Location: {redirected_location_header}")
+            else:
+                print(f"No Further Redirection.")
+
+        else:
+            print(f"No Redirection Detected.")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error occurred while checking target: {target_url}")
+        print(f"Error: {str(e)}")
+
+def main():
+    # Read the list of target URLs from a file
+    with open("targets.txt", "r") as file:
+        targets = file.read().splitlines()
+
+    # Define the proxy settings (if applicable)
+    proxy = {
+        "http": "http://proxy_ip:proxy_port",
+        "https": "http://proxy_ip:proxy_port"
+    }
+
+    # Iterate over each target URL
+    for target_url in targets:
+        print("=" * 50)
+        check_target_redirection(target_url, proxy)
+        print("=" * 50)
+        print()
+
+if __name__ == "__main__":
+    main()

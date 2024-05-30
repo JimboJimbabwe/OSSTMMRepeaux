@@ -1,0 +1,18 @@
+def compare_files(file1, file2):
+    with open(file1, 'r') as f1, open(file2, 'r') as f2:
+        content1 = f1.read()
+        content2 = f2.read()
+        
+        if content1 == content2:
+            print("The files have the same content.")
+        else:
+            print("The files have different content.")
+
+def main():
+    file1 = input("Enter the name of the first file: ")
+    file2 = input("Enter the name of the second file: ")
+    
+    compare_files(file1, file2)
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,65 @@
+import requests
+import itertools
+
+def generate_variants(ip_block, domain):
+    # Generate IP variants
+    ip_parts = ip_block.split('.')
+    ip_variants = []
+    for i in range(1, 255):
+        ip_variant = f"{ip_parts[0]}.{ip_parts[1]}.{ip_parts[2]}.{i}"
+        ip_variants.append(ip_variant)
+
+    # Generate domain variants
+    domain_parts = domain.split('.')
+    domain_variants = []
+    for i in range(1, 10):
+        domain_variant = f"{domain_parts[0]}{i}.{domain_parts[1]}"
+        domain_variants.append(domain_variant)
+
+    # Combine IP and domain variants
+    combined_variants = list(itertools.product(ip_variants, domain_variants))
+
+    # Limit the number of variants to 10000
+    limited_variants = combined_variants[:10000]
+
+    return limited_variants
+
+def save_to_file(variants, filename):
+    with open(filename, 'w') as file:
+        for variant in variants:
+            file.write(f"{variant[0]} {variant[1]}\n")
+
+def test_access(variants):
+    accessible_urls = []
+    for variant in variants:
+        ip = variant[0]
+        domain = variant[1]
+        url = f"http://{domain}"
+        try:
+            response = requests.get(url, timeout=5)
+            if response.status_code == 200:
+                accessible_urls.append(url)
+                print(f"Accessible: {url}")
+        except requests.exceptions.RequestException:
+            pass
+
+    return accessible_urls
+
+# Get user input
+ip_block = input("Enter the IP block of the target: ")
+domain = input("Enter the domain of the target: ")
+
+# Generate variants
+variants = generate_variants(ip_block, domain)
+
+# Save variants to files
+save_to_file(variants, 'ip_variants.txt')
+save_to_file(variants, 'domain_variants.txt')
+
+# Test access to each variant
+accessible_urls = test_access(variants)
+
+# Print the accessible URLs
+print("Accessible URLs:")
+for url in accessible_urls:
+    print(url)

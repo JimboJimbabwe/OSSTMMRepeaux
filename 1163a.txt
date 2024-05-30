@@ -1,0 +1,46 @@
+import subprocess
+
+def run_hydra(service, host, username, password_file):
+    command = f"hydra -l {username} -P {password_file} {host} {service}"
+    try:
+        output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, universal_newlines=True)
+        print(output)
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred while running Hydra: {str(e)}")
+        print(e.output)
+
+def main():
+    print("Password Testing Tool")
+    print("---------------------")
+
+    while True:
+        print("\nSelect a service to test:")
+        print("1. FTP")
+        print("2. SSH")
+        print("3. HTTP")
+        print("4. SQL")
+        print("5. Exit")
+
+        choice = input("Enter your choice (1-5): ")
+
+        if choice == "5":
+            print("Exiting...")
+            break
+
+        host = input("Enter the target host: ")
+        username = input("Enter the username: ")
+        password_file = input("Enter the path to the password file: ")
+
+        if choice == "1":
+            run_hydra("ftp", host, username, password_file)
+        elif choice == "2":
+            run_hydra("ssh", host, username, password_file)
+        elif choice == "3":
+            run_hydra("http-post-form", host, username, password_file)
+        elif choice == "4":
+            run_hydra("mysql", host, username, password_file)
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    main()

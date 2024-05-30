@@ -1,0 +1,64 @@
+import nmap
+import datetime
+
+def perform_nmap_scan(ip_address):
+    nm = nmap.PortScanner()
+    
+    print("Scanning TCP ports...")
+    nm.scan(ip_address, arguments='-p 1-65535 -sT')
+    tcp_results = nm[ip_address]['tcp']
+    
+    print("Scanning UDP ports...")
+    nm.scan(ip_address, arguments='-p 1-65535 -sU')
+    udp_results = nm[ip_address]['udp']
+    
+    return tcp_results, udp_results
+
+def get_closed_ports(results):
+    closed_ports = []
+    for port, status in results.items():
+        if status['state'] == 'closed' or status['state'] == 'filtered':
+            closed_ports.append(port)
+    return closed_ports
+
+def save_results_to_file(ip_address, scan_type, closed_tcp_ports, closed_udp_ports):
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"{scan_type}_scan_{ip_address}_{timestamp}.txt"
+    
+    with open(filename, 'w') as file:
+        file.write(f"NMAP Scan Results - {scan_type} Scan\n")
+        file.write(f"IP Address: {ip_address}\n")
+        file.write(f"Date: {timestamp}\n\n")
+        
+        file.write("Closed TCP Ports:\n")
+        for port in closed_tcp_ports:
+            file.write(f"- {port}\n")
+        
+        file.write("\nClosed UDP Ports:\n")
+        for port in closed_udp_ports:
+            file.write(f"- {port}\n")
+    
+    print(f"Results saved to file: {filename}")
+
+def main():
+    ip_address = input("Enter the IP address to scan: ")
+    scan_type = input("Enter the scan type (internal/external): ")
+    
+    print(f"Performing NMAP scan on {ip_address}...")
+    tcp_results, udp_results = perform_nmap_scan(ip_address)
+    
+    closed_tcp_ports = get_closed_ports(tcp_results)
+    closed_udp_ports = get_closed_ports(udp_results)
+    
+    print("\nClosed TCP Ports:")
+    for port in closed_tcp_ports:
+        print(f"- {port}")
+    
+    print("\nClosed UDP Ports:")
+    for port in closed_udp_ports:
+        print(f"- {port}")
+    
+    save_results_to_file(ip_address, scan_type, closed_tcp_ports, closed_udp_ports)
+
+if __name__ == "__main__":
+    main()
